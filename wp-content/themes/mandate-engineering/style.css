@@ -239,6 +239,12 @@ body:not(.home) .site-header,
   width: 60%;
 }
 
+/* The Capabilities dropdown is nested inside .primary-menu, so exclude its
+   links from the main-menu underline effect. */
+.primary-menu .services-submenu a::after {
+  content: none;
+}
+
 /* Logo glow */
 .logo-link:hover .logo-svg {
   filter: drop-shadow(0 0 12px var(--brand-emerald-glow));

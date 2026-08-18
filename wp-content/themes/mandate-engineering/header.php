@@ -27,33 +27,22 @@
 
             <!-- Desktop Navigation -->
             <nav class="hidden lg:flex items-center gap-2 font-medium">
-                <?php if ( has_nav_menu( 'primary' ) ) : ?>
-                    <?php
-                    wp_nav_menu( array(
-                        'theme_location' => 'primary',
-                        'container'      => false,
-                        'menu_class'     => 'primary-menu',
-                        'fallback_cb'    => false,
-                    ) );
-                    ?>
-                <?php else : ?>
-                    <div class="primary-menu">
-                        <a href="<?php echo esc_url( home_url( '/' ) ); ?>">Home</a>
-                        <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact</a>
-                        <a href="<?php echo esc_url( mandate_engineering_get_projects_page_url() ); ?>">Projects</a>
+                <div class="primary-menu">
+                    <a href="<?php echo esc_url( home_url( '/' ) ); ?>">Home</a>
+                    <div class="services-menu">
+                        <button type="button" class="services-menu-trigger" aria-haspopup="true">
+                            Capabilities
+                            <svg class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="services-submenu">
+                            <a href="<?php echo esc_url( home_url( '/cooling-heat-transfer/' ) ); ?>">Cooling &amp; Heat Transfer</a>
+                            <a href="<?php echo esc_url( home_url( '/specialised-coolers/' ) ); ?>">Specialised Coolers</a>
+                            <a href="<?php echo esc_url( home_url( '/boilers-steam-insulation/' ) ); ?>">Boilers, Steam &amp; Insulation</a>
+                            <a href="<?php echo esc_url( home_url( '/process-drying-equipment/' ) ); ?>">Process &amp; Drying Equipment</a>
+                        </div>
                     </div>
-                <?php endif; ?>
-                <div class="services-menu">
-                    <button type="button" class="services-menu-trigger" aria-haspopup="true">
-                        Capabilities
-                        <svg class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-                    <div class="services-submenu">
-                        <a href="<?php echo esc_url( home_url( '/cooling-heat-transfer/' ) ); ?>">Cooling &amp; Heat Transfer</a>
-                        <a href="<?php echo esc_url( home_url( '/specialised-coolers/' ) ); ?>">Specialised Coolers</a>
-                        <a href="<?php echo esc_url( home_url( '/boilers-steam-insulation/' ) ); ?>">Boilers, Steam &amp; Insulation</a>
-                        <a href="<?php echo esc_url( home_url( '/process-drying-equipment/' ) ); ?>">Process &amp; Drying Equipment</a>
-                    </div>
+                    <a href="<?php echo esc_url( mandate_engineering_get_projects_page_url() ); ?>">Projects</a>
+                    <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact</a>
                 </div>
                 <div class="flex items-center gap-4 ml-4">
                     <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>" class="btn-glow px-6 py-2.5 rounded-lg font-heading font-bold text-sm bg-brand-emerald text-brand-navy-deep hover:bg-[#169653] transition-all duration-300">Request Quote</a>
@@ -72,8 +61,6 @@
     <!-- Mobile Drawer -->
     <div id="mobile-drawer" class="mobile-drawer">
         <a href="<?php echo esc_url( home_url( '/' ) ); ?>">Home</a>
-        <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact</a>
-        <a href="<?php echo esc_url( mandate_engineering_get_projects_page_url() ); ?>">Projects</a>
         <div class="mt-4 pt-4 border-t border-white/10">
             <button type="button" class="capabilities-toggle" aria-expanded="true" aria-controls="mobile-capabilities-links">
                 <span>Capabilities</span>
@@ -86,6 +73,8 @@
                 <a href="<?php echo esc_url( home_url( '/process-drying-equipment/' ) ); ?>">Process &amp; Drying Equipment</a>
             </div>
         </div>
+        <a href="<?php echo esc_url( mandate_engineering_get_projects_page_url() ); ?>">Projects</a>
+        <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact</a>
         <div class="mobile-cta mt-6">
             <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>" class="inline-block px-8 py-3.5 rounded-lg font-heading font-bold bg-brand-emerald text-brand-navy-deep hover:bg-[#169653] transition-colors">Request a Quote</a>
         </div>

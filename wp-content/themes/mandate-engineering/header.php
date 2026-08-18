@@ -75,11 +75,16 @@
         <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact</a>
         <a href="<?php echo esc_url( mandate_engineering_get_projects_page_url() ); ?>">Projects</a>
         <div class="mt-4 pt-4 border-t border-white/10">
-            <p class="px-4 py-2 text-xs font-heading font-bold uppercase tracking-widest text-brand-emerald mb-2">Capabilities</p>
-            <a href="<?php echo esc_url( home_url( '/cooling-heat-transfer/' ) ); ?>">Cooling &amp; Heat Transfer</a>
-            <a href="<?php echo esc_url( home_url( '/specialised-coolers/' ) ); ?>">Specialised Coolers</a>
-            <a href="<?php echo esc_url( home_url( '/boilers-steam-insulation/' ) ); ?>">Boilers, Steam &amp; Insulation</a>
-            <a href="<?php echo esc_url( home_url( '/process-drying-equipment/' ) ); ?>">Process &amp; Drying Equipment</a>
+            <button type="button" class="capabilities-toggle" aria-expanded="false" aria-controls="mobile-capabilities-links">
+                <span>Capabilities</span>
+                <svg class="capabilities-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div id="mobile-capabilities-links" class="mobile-capabilities-links">
+                <a href="<?php echo esc_url( home_url( '/cooling-heat-transfer/' ) ); ?>">Cooling &amp; Heat Transfer</a>
+                <a href="<?php echo esc_url( home_url( '/specialised-coolers/' ) ); ?>">Specialised Coolers</a>
+                <a href="<?php echo esc_url( home_url( '/boilers-steam-insulation/' ) ); ?>">Boilers, Steam &amp; Insulation</a>
+                <a href="<?php echo esc_url( home_url( '/process-drying-equipment/' ) ); ?>">Process &amp; Drying Equipment</a>
+            </div>
         </div>
         <div class="mobile-cta mt-6">
             <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>" class="inline-block px-8 py-3.5 rounded-lg font-heading font-bold bg-brand-emerald text-brand-navy-deep hover:bg-[#169653] transition-colors">Request a Quote</a>
@@ -117,6 +122,17 @@
                     drawer.classList.remove('is-open');
                     document.body.style.overflow = '';
                 });
+            });
+        }
+
+        // Mobile Capabilities accordion toggle
+        var capToggle = document.querySelector('.capabilities-toggle');
+        var capLinks = document.getElementById('mobile-capabilities-links');
+        if (capToggle && capLinks) {
+            capToggle.addEventListener('click', function () {
+                var isOpen = capToggle.getAttribute('aria-expanded') === 'true';
+                capToggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+                capLinks.classList.toggle('is-open', !isOpen);
             });
         }
 

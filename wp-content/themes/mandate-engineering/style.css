@@ -503,6 +503,13 @@ body:not(.home) .site-header,
   .hamburger-btn { display: flex; }
 }
 
+@media (min-width: 768px) and (max-width: 1023px) {
+  .mobile-drawer {
+    width: min(70vw, 420px);
+    padding-top: 7rem;
+  }
+}
+
 /* Drawer is hidden by default on all sizes and only opened via JS,
    so no extra media query is needed for it here. */
 
@@ -578,10 +585,16 @@ body:not(.home) .site-header,
 
 .hero-title {
   max-width: 900px;
-  font-size: clamp(2.75rem, 8vw, 8rem);
+  font-size: clamp(2.5rem, 7.5vw, 4.5rem);
   letter-spacing: -0.075em;
   line-height: 0.9;
   animation: fadeUp 0.8s var(--transition-smooth) 0.4s both;
+}
+
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: clamp(4.5rem, 8vw, 8rem);
+  }
 }
 
 .hero-copy {

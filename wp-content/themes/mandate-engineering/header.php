@@ -75,11 +75,11 @@
         <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">Contact</a>
         <a href="<?php echo esc_url( mandate_engineering_get_projects_page_url() ); ?>">Projects</a>
         <div class="mt-4 pt-4 border-t border-white/10">
-            <button type="button" class="capabilities-toggle" aria-expanded="false" aria-controls="mobile-capabilities-links">
+            <button type="button" class="capabilities-toggle" aria-expanded="true" aria-controls="mobile-capabilities-links">
                 <span>Capabilities</span>
                 <svg class="capabilities-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <div id="mobile-capabilities-links" class="mobile-capabilities-links">
+            <div id="mobile-capabilities-links" class="mobile-capabilities-links is-open">
                 <a href="<?php echo esc_url( home_url( '/cooling-heat-transfer/' ) ); ?>">Cooling &amp; Heat Transfer</a>
                 <a href="<?php echo esc_url( home_url( '/specialised-coolers/' ) ); ?>">Specialised Coolers</a>
                 <a href="<?php echo esc_url( home_url( '/boilers-steam-insulation/' ) ); ?>">Boilers, Steam &amp; Insulation</a>
@@ -110,19 +110,79 @@
         var btn = document.getElementById('mobile-menu-btn');
         var drawer = document.getElementById('mobile-drawer');
         if (btn && drawer) {
+            var isOpen = function () { return drawer.classList.contains('is-open'); };
+            function setOpen(open) {
+                btn.classList.toggle('is-active', open);
+                drawer.classList.toggle('is-open', open);
+                document.body.style.overflow = open ? 'hidden' : '';
+                drawer.style.transform = '';
+                drawer.classList.remove('is-dragging');
+            }
             btn.addEventListener('click', function () {
-                btn.classList.toggle('is-active');
-                drawer.classList.toggle('is-open');
-                document.body.style.overflow = drawer.classList.contains('is-open') ? 'hidden' : '';
+                setOpen(!isOpen());
             });
             // Close drawer when clicking a link
             drawer.querySelectorAll('a').forEach(function (link) {
                 link.addEventListener('click', function () {
-                    btn.classList.remove('is-active');
-                    drawer.classList.remove('is-open');
-                    document.body.style.overflow = '';
+                    setOpen(false);
                 });
             });
+
+            // Swipe gestures: drag panel right to reveal the page behind.
+            // Vertical scrolling stays native (bounded, no blank overscroll).
+            var startX = 0, startY = 0, deltaX = 0, dragging = false,
+                axis = null, drawerW = 0;
+
+            drawer.addEventListener('pointerdown', function (e) {
+                if (!isOpen()) return;
+                startX = e.clientX;
+                startY = e.clientY;
+                deltaX = 0;
+                axis = null;
+                dragging = true;
+                drawerW = drawer.offsetWidth;
+                drawer.classList.add('is-dragging');
+                drawer.setPointerCapture(e.pointerId);
+            });
+
+            drawer.addEventListener('pointermove', function (e) {
+                if (!dragging) return;
+                var dx = e.clientX - startX;
+                var dy = e.clientY - startY;
+                if (axis === null) {
+                    if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+                    axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+                }
+                if (axis !== 'x') return; // vertical → native scroll only
+                // Drag right only (push aside); never left beyond the edge.
+                deltaX = Math.max(0, dx);
+                drawer.style.transform = 'translateX(' + deltaX + 'px)';
+            });
+
+            function endDrag(e) {
+                if (!dragging) return;
+                dragging = false;
+                drawer.classList.remove('is-dragging');
+                if (e.pointerId !== undefined) {
+                    try { drawer.releasePointerCapture(e.pointerId); } catch (err) {}
+                }
+                if (axis === 'x' && deltaX > drawerW * 0.35) {
+                    // Push fully aside then close.
+                    drawer.style.transition = 'transform 0.3s var(--transition-smooth)';
+                    drawer.style.transform = 'translateX(100%)';
+                    setTimeout(function () {
+                        drawer.style.transition = '';
+                        setOpen(false);
+                    }, 300);
+                } else {
+                    drawer.style.transition = 'transform 0.3s var(--transition-smooth)';
+                    drawer.style.transform = '';
+                    setTimeout(function () { drawer.style.transition = ''; }, 300);
+                }
+            }
+
+            drawer.addEventListener('pointerup', endDrag);
+            drawer.addEventListener('pointercancel', endDrag);
         }
 
         // Mobile Capabilities accordion toggle

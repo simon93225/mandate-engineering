@@ -385,8 +385,17 @@ body:not(.home) .site-header,
   flex-direction: column;
   gap: 0.5rem;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  will-change: transform;
   box-shadow: -20px 0 60px rgba(0, 0, 0, 0.45);
   border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mobile-drawer.is-dragging {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .mobile-drawer.is-open {

@@ -61,7 +61,7 @@
     <!-- Mobile Drawer -->
     <div id="mobile-drawer" class="mobile-drawer">
         <a href="<?php echo esc_url( home_url( '/' ) ); ?>">Home</a>
-        <div class="mt-4 pt-4 border-t border-white/10">
+        <div class="capabilities-block mt-4 pt-4 border-t border-white/10">
             <button type="button" class="capabilities-toggle" aria-expanded="true" aria-controls="mobile-capabilities-links">
                 <span>Capabilities</span>
                 <svg class="capabilities-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>

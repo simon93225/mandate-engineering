@@ -253,7 +253,6 @@
             }
         });
         if (close) { close.addEventListener('click', closePopup); }
-        setTimeout(openPopup, 4000);
     }
 }());
 </script>

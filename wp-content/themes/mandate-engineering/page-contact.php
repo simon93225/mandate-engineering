@@ -5,6 +5,13 @@
 get_header();
 
 $form_status = isset( $_GET['contact'] ) ? sanitize_key( wp_unslash( $_GET['contact'] ) ) : '';
+
+// Simple maths captcha: two operands rendered to the visitor, with the
+// expected answer bound to a WordPress nonce (never sent in plaintext).
+$captcha_a = mt_rand( 1, 9 );
+$captcha_b = mt_rand( 1, 9 );
+$captcha_answer = $captcha_a + $captcha_b;
+$captcha_nonce  = wp_create_nonce( 'mandate_captcha_' . $captcha_answer );
 ?>
 
 <main class="min-h-screen bg-brand-navy-deep">
@@ -42,19 +49,40 @@ $form_status = isset( $_GET['contact'] ) ? sanitize_key( wp_unslash( $_GET['cont
                 </div>
             <?php endif; ?>
 
-            <form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post" class="space-y-6">
+            <form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post" class="space-y-6" id="contact-form" novalidate>
                 <input type="hidden" name="action" value="mandate_contact_form">
                 <?php wp_nonce_field( 'mandate_contact_form', 'mandate_contact_nonce' ); ?>
+                <input type="hidden" name="captcha_a" value="<?php echo esc_attr( $captcha_a ); ?>">
+                <input type="hidden" name="captcha_b" value="<?php echo esc_attr( $captcha_b ); ?>">
+                <input type="hidden" name="captcha_nonce" value="<?php echo esc_attr( $captcha_nonce ); ?>">
                 <div class="hidden" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
                 <div class="grid md:grid-cols-2 gap-6">
-                    <label class="block text-sm font-semibold">Full name *<input required type="text" name="name" class="mt-2 w-full px-4 py-3.5 text-sm"></label>
-                    <label class="block text-sm font-semibold">Email address *<input required type="email" name="email" class="mt-2 w-full px-4 py-3.5 text-sm"></label>
+                    <div class="form-field">
+                        <label class="block text-sm font-semibold">Full name *<input required type="text" name="name" class="mt-2 w-full px-4 py-3.5 text-sm" data-required></label>
+                    </div>
+                    <div class="form-field">
+                        <label class="block text-sm font-semibold">Email address *<input required type="email" name="email" class="mt-2 w-full px-4 py-3.5 text-sm" data-required></label>
+                    </div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-6">
-                    <label class="block text-sm font-semibold">Phone number<input type="tel" name="phone" class="mt-2 w-full px-4 py-3.5 text-sm"></label>
-                    <label class="block text-sm font-semibold">Service needed<select name="service" class="mt-2 w-full px-4 py-3.5 text-sm"><option value="">Select a service</option><option>Cooling &amp; heat transfer</option><option>Specialised coolers</option><option>Boilers, steam &amp; insulation</option><option>Process &amp; drying equipment</option><option>Other</option></select></label>
+                    <div class="form-field">
+                        <label class="block text-sm font-semibold">Phone number<input type="tel" name="phone" class="mt-2 w-full px-4 py-3.5 text-sm" data-phone></label>
+                    </div>
+                    <div class="form-field">
+                        <label class="block text-sm font-semibold">Service needed<select name="service" class="mt-2 w-full px-4 py-3.5 text-sm"><option value="">Select a service</option><option>Cooling &amp; heat transfer</option><option>Specialised coolers</option><option>Boilers, steam &amp; insulation</option><option>Process &amp; drying equipment</option><option>Other</option></select></label>
+                    </div>
                 </div>
-                <label class="block text-sm font-semibold">How can we help? *<textarea required name="message" rows="6" class="mt-2 w-full px-4 py-3.5 text-sm" placeholder="Tell us about the equipment, service, or project you need."></textarea></label>
+                <div class="form-field">
+                    <label class="block text-sm font-semibold">How can we help? *<textarea required name="message" rows="6" class="mt-2 w-full px-4 py-3.5 text-sm" placeholder="Tell us about the equipment, service, or project you need." data-required></textarea></label>
+                </div>
+                <div class="form-field">
+                    <label class="block text-sm font-semibold" for="captcha">Security check *</label>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 mt-2">
+                        <span class="text-slate-300 text-sm font-medium select-none">What is <?php echo esc_html( $captcha_a ); ?> + <?php echo esc_html( $captcha_b ); ?>?</span>
+                        <input id="captcha" type="text" name="captcha_answer" inputmode="numeric" autocomplete="off" class="w-full sm:w-32 px-4 py-3.5 text-sm" aria-describedby="captcha-hint" data-captcha>
+                        <span id="captcha-hint" class="text-xs text-slate-500">Solve this to prove you are human.</span>
+                    </div>
+                </div>
                 <button type="submit" class="btn-glow w-full md:w-auto px-8 py-3.5 rounded-lg font-heading font-bold bg-brand-emerald text-brand-navy-deep hover:bg-[#169653] transition-all duration-300">Send enquiry</button>
             </form>
         </div>
@@ -77,5 +105,71 @@ $form_status = isset( $_GET['contact'] ) ? sanitize_key( wp_unslash( $_GET['cont
         </aside>
     </section>
 </main>
+
+<script>
+(function () {
+    var form = document.getElementById('contact-form');
+    if (!form) return;
+
+    function setError(input, message) {
+        var field = input.closest('.form-field') || input.parentElement;
+        var err = field.querySelector('.form-error');
+        if (!err) {
+            err = document.createElement('p');
+            err.className = 'form-error text-xs text-amber-400 font-medium mt-1.5';
+            field.appendChild(err);
+        }
+        err.textContent = message;
+        input.setAttribute('aria-invalid', 'true');
+    }
+
+    function clearError(input) {
+        var field = input.closest('.form-field') || input.parentElement;
+        var err = field.querySelector('.form-error');
+        if (err) { err.remove(); }
+        input.removeAttribute('aria-invalid');
+    }
+
+    form.addEventListener('submit', function (e) {
+        var firstInvalid = null;
+
+        form.querySelectorAll('[data-required]').forEach(function (input) {
+            clearError(input);
+            if (!input.value.trim()) {
+                setError(input, input.name === 'email' ? 'Please enter your email address.' : 'This field is required.');
+                if (!firstInvalid) firstInvalid = input;
+            } else if (input.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim())) {
+                setError(input, 'Please enter a valid email address.');
+                if (!firstInvalid) firstInvalid = input;
+            }
+        });
+
+        var phone = form.querySelector('[data-phone]');
+        if (phone && phone.value.trim() && !/^[+0-9\s()-]{7,20}$/.test(phone.value.trim())) {
+            clearError(phone);
+            setError(phone, 'Please enter a valid phone number.');
+            if (!firstInvalid) firstInvalid = phone;
+        }
+
+        var captcha = form.querySelector('[data-captcha]');
+        var a = parseInt(form.querySelector('[name="captcha_a"]').value, 10) || 0;
+        var b = parseInt(form.querySelector('[name="captcha_b"]').value, 10) || 0;
+        clearError(captcha);
+        if (captcha.value.trim() === '') {
+            setError(captcha, 'Please answer the security question.');
+            if (!firstInvalid) firstInvalid = captcha;
+        } else if (parseInt(captcha.value.trim(), 10) !== a + b) {
+            setError(captcha, 'That answer is incorrect. Please try again.');
+            if (!firstInvalid) firstInvalid = captcha;
+        }
+
+        if (firstInvalid) {
+            e.preventDefault();
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus();
+        }
+    });
+}());
+</script>
 
 <?php get_footer(); ?>

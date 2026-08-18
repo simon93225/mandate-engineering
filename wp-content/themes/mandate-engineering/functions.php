@@ -277,6 +277,22 @@ function mandate_engineering_handle_contact_form() {
         exit;
     }
 
+    // Simple maths captcha: verify the submitted answer matches the nonce
+    // that was bound to the correct sum at form render time.
+    $captcha_a = isset( $_POST['captcha_a'] ) ? (int) $_POST['captcha_a'] : 0;
+    $captcha_b = isset( $_POST['captcha_b'] ) ? (int) $_POST['captcha_b'] : 0;
+    $captcha_answer = isset( $_POST['captcha_answer'] ) ? (int) $_POST['captcha_answer'] : 0;
+    $captcha_nonce  = isset( $_POST['captcha_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['captcha_nonce'] ) ) : '';
+
+    if (
+        $captcha_a < 1 || $captcha_b < 1 ||
+        ( $captcha_a + $captcha_b ) !== $captcha_answer ||
+        ! wp_verify_nonce( $captcha_nonce, 'mandate_captcha_' . ( $captcha_a + $captcha_b ) )
+    ) {
+        wp_safe_redirect( add_query_arg( 'contact', 'invalid', $contact_url ) );
+        exit;
+    }
+
     $name    = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
     $email   = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
     $phone   = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';

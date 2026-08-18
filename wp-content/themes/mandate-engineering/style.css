@@ -373,20 +373,36 @@ body:not(.home) .site-header,
 .mobile-drawer {
   display: none;
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(85vw, 340px);
   z-index: 55;
-  background: rgba(10, 26, 51, 0.97);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  padding: 6rem 2rem 2rem;
+  background: rgba(10, 26, 51, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 6rem 1.5rem 2rem;
   flex-direction: column;
   gap: 0.5rem;
   overflow-y: auto;
+  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.45);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .mobile-drawer.is-open {
   display: flex;
-  animation: fadeIn 0.3s ease;
+  animation: slideInRight 0.3s var(--transition-smooth);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .mobile-drawer a {

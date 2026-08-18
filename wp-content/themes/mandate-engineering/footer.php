@@ -58,6 +58,39 @@
 </div>
 
 <?php wp_footer(); ?>
+
+<!-- WhatsApp Floating Chat Widget -->
+<div class="whatsapp-widget" id="whatsapp-widget">
+    <div class="whatsapp-popup" id="whatsapp-popup" role="dialog" aria-label="WhatsApp chat" aria-hidden="true">
+        <div class="whatsapp-popup-header">
+            <div class="whatsapp-avatar">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.88.52 3.71 1.5 5.31L2 22l4.82-1.48A9.96 9.96 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>
+            </div>
+            <div class="whatsapp-popup-info">
+                <p class="whatsapp-popup-name">Mandate Engineering</p>
+                <p class="whatsapp-popup-status">Typically replies within minutes</p>
+            </div>
+            <button type="button" class="whatsapp-popup-close" id="whatsapp-close" aria-label="Close chat">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="whatsapp-popup-body">
+            <div class="whatsapp-bubble">
+                <p>Hi there! 👋</p>
+                <p>How can we help you with your cooling, boiler, or heat-transfer needs today?</p>
+            </div>
+            <a href="https://wa.me/263772967719?text=<?php echo rawurlencode( 'Hello Mandate Engineering, I would like to make an enquiry.' ); ?>" target="_blank" rel="noopener" class="whatsapp-chat-btn">
+                <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 3C9.37 3 4 8.31 4 14.86c0 2.86 1.1 5.48 2.95 7.47L6 26.9l4.83-1.55c1.56.6 3.28.95 5.17.95 6.63 0 12-5.31 12-11.86S22.63 3 16 3zm5.4 16.71c-.24.67-1.38 1.28-1.9 1.33-.51.05-.98.24-3.31-.68-2.78-1.1-4.53-3.94-4.67-4.12-.14-.19-1.12-1.49-1.12-2.85s.71-2.02.96-2.3c.25-.28.55-.35.74-.35h.53c.17 0 .4-.06.62.48.24.58.8 2 .87 2.14.07.14.12.31.02.5-.1.19-.15.31-.29.48-.14.17-.3.38-.43.51-.14.14-.29.29-.13.58.17.29.74 1.22 1.59 1.98 1.09.98 2.01 1.29 2.3 1.43.28.14.45.12.62-.07.17-.19.72-.84.91-1.13.19-.29.38-.24.64-.14.26.1 1.66.78 1.94.92.29.14.48.21.55.33.07.12.07.69-.17 1.36z"/></svg>
+                Start Chat
+            </a>
+        </div>
+    </div>
+    <button type="button" class="whatsapp-fab" id="whatsapp-fab" aria-label="Chat with us on WhatsApp">
+        <svg class="whatsapp-fab-icon" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 3C9.37 3 4 8.31 4 14.86c0 2.86 1.1 5.48 2.95 7.47L6 26.9l4.83-1.55c1.56.6 3.28.95 5.17.95 6.63 0 12-5.31 12-11.86S22.63 3 16 3zm5.4 16.71c-.24.67-1.38 1.28-1.9 1.33-.51.05-.98.24-3.31-.68-2.78-1.1-4.53-3.94-4.67-4.12-.14-.19-1.12-1.49-1.12-2.85s.71-2.02.96-2.3c.25-.28.55-.35.74-.35h.53c.17 0 .4-.06.62.48.24.58.8 2 .87 2.14.07.14.12.31.02.5-.1.19-.15.31-.29.48-.14.17-.3.38-.43.51-.14.14-.29.29-.13.58.17.29.74 1.22 1.59 1.98 1.09.98 2.01 1.29 2.3 1.43.28.14.45.12.62-.07.17-.19.72-.84.91-1.13.19-.29.38-.24.64-.14.26.1 1.66.78 1.94.92.29.14.48.21.55.33.07.12.07.69-.17 1.36z"/></svg>
+        <svg class="whatsapp-fab-close" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+</div>
+
 <script>
 (function () {
     var LIMIT = 6;
@@ -196,6 +229,32 @@
         goTo(0);
         start();
     });
+
+    // WhatsApp widget toggle
+    var fab = document.getElementById('whatsapp-fab');
+    var popup = document.getElementById('whatsapp-popup');
+    var close = document.getElementById('whatsapp-close');
+    if (fab && popup) {
+        function openPopup() {
+            popup.classList.add('is-open');
+            popup.setAttribute('aria-hidden', 'false');
+            fab.classList.add('is-open');
+        }
+        function closePopup() {
+            popup.classList.remove('is-open');
+            popup.setAttribute('aria-hidden', 'true');
+            fab.classList.remove('is-open');
+        }
+        fab.addEventListener('click', function () {
+            if (popup.classList.contains('is-open')) {
+                closePopup();
+            } else {
+                openPopup();
+            }
+        });
+        if (close) { close.addEventListener('click', closePopup); }
+        setTimeout(openPopup, 4000);
+    }
 }());
 </script>
 </body>

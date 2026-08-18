@@ -34,9 +34,11 @@ services:
       WORDPRESS_CONFIG_EXTRA: |
         define('WP_HOME', 'http://${SERVER_IP}');
         define('WP_SITEURL', 'http://${SERVER_IP}');
-        define('WP_DEBUG', true);
-        define('WP_DEBUG_LOG', true);
+        define('WP_DEBUG', false);
+        define('WP_DEBUG_LOG', false);
         define('WP_DEBUG_DISPLAY', false);
+        define('WP_AUTO_UPDATE_CORE', false);
+        define('DISALLOW_FILE_EDIT', true);
         define('AUTH_KEY', '909ccb518d119233236a4c60d53cc927438206fb');
         define('SECURE_AUTH_KEY', '3c68272a5afdd5e03a44c3a9972b41b6c3f3c97c');
         define('LOGGED_IN_KEY', 'b3e21243fa9a7b056cc17dbd038ef060b740376a');
@@ -47,6 +49,7 @@ services:
         define('NONCE_SALT', 'bb700d8f10168f7ed30574b31f3b1de877208863');
     volumes:
       - ./wp-content:/var/www/html/wp-content
+      - ./.htaccess:/var/www/html/.htaccess:ro
     networks:
       - mandate-network
 

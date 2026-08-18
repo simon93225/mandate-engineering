@@ -491,12 +491,6 @@ function mandate_engineering_get_customers() {
 function mandate_engineering_get_testimonials() {
     return array(
         array(
-            'quote'   => 'Mandate Engineering delivered reliable cooler reconditioning work that kept our operations running without downtime. Their turnaround and quality were impressive. [Draft — replace with real quote]',
-            'name'    => 'Client Representative',
-            'role'    => 'Director',
-            'company' => 'ZESA',
-        ),
-        array(
             'quote'   => 'From heat exchangers to steam insulation, the team handled our requirements with precision and professionalism. [Draft — replace with real quote]',
             'name'    => 'Client Representative',
             'role'    => 'Plant Manager',
@@ -639,6 +633,161 @@ function mandate_engineering_scripts() {
     wp_enqueue_style( 'mandate-style', get_stylesheet_uri(), array( 'mandate-google-fonts' ), '2.0.0' );
 }
 add_action( 'wp_enqueue_scripts', 'mandate_engineering_scripts' );
+
+/**
+ * Returns the meta description for the page currently being viewed.
+ */
+function mandate_engineering_get_meta_description() {
+    $description = '';
+
+    if ( is_front_page() ) {
+        $description = 'Mandate Engineering is a Zimbabwe-based engineering company manufacturing, servicing, and repairing heat-transfer equipment, boilers, steam lines, coolers, radiators, and custom metalwork since 1998.';
+    } elseif ( is_singular() ) {
+        $post = get_queried_object();
+        if ( $post && ! empty( $post->post_excerpt ) ) {
+            $description = $post->post_excerpt;
+        } elseif ( $post && ! empty( $post->post_content ) ) {
+            $description = wp_trim_words( wp_strip_all_tags( strip_shortcodes( $post->post_content ) ), 30, '' );
+        }
+    } elseif ( is_archive() ) {
+        $description = 'A look at the cooling, heat-transfer, boiler, steam, and fabrication projects completed by Mandate Engineering.';
+    }
+
+    if ( '' === $description ) {
+        $description = 'Mandate Engineering provides manufacturing, servicing, and repair of heat-transfer equipment, boilers, steam lines, and custom metalwork across Zimbabwe since 1998.';
+    }
+
+    return $description;
+}
+
+/**
+ * Outputs SEO meta tags: description, canonical, Open Graph and Twitter Card.
+ */
+function mandate_engineering_seo_meta() {
+    $title       = wp_get_document_title();
+    $description = mandate_engineering_get_meta_description();
+    $url         = is_singular() ? get_permalink() : home_url( add_query_arg( array() ) );
+    $image       = get_stylesheet_directory_uri() . '/assets/images/hero-bg-hd.jpg';
+
+    if ( is_singular() && has_post_thumbnail() ) {
+        $thumbnail = wp_get_attachment_image_src( get_post_thumbnail_id(), 'large' );
+        if ( $thumbnail ) {
+            $image = $thumbnail[0];
+        }
+    }
+    ?>
+    <meta name="description" content="<?php echo esc_attr( $description ); ?>">
+    <link rel="canonical" href="<?php echo esc_url( $url ); ?>">
+
+    <meta property="og:type" content="<?php echo is_singular( 'mandate_project' ) ? 'article' : 'website'; ?>">
+    <meta property="og:title" content="<?php echo esc_attr( $title ); ?>">
+    <meta property="og:description" content="<?php echo esc_attr( $description ); ?>">
+    <meta property="og:url" content="<?php echo esc_url( $url ); ?>">
+    <meta property="og:image" content="<?php echo esc_url( $image ); ?>">
+    <meta property="og:site_name" content="<?php bloginfo( 'name' ); ?>">
+    <meta property="og:locale" content="en_ZW">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?php echo esc_attr( $title ); ?>">
+    <meta name="twitter:description" content="<?php echo esc_attr( $description ); ?>">
+    <meta name="twitter:image" content="<?php echo esc_url( $image ); ?>">
+    <?php
+}
+add_action( 'wp_head', 'mandate_engineering_seo_meta', 5 );
+
+/**
+ * Outputs Organization structured data (JSON-LD) for rich results.
+ */
+function mandate_engineering_schema_org() {
+    $schema = array(
+        '@context'      => 'https://schema.org',
+        '@type'         => 'Organization',
+        'name'          => 'Mandate Engineering',
+        'url'           => home_url( '/' ),
+        'logo'          => get_stylesheet_directory_uri() . '/assets/favicon.svg',
+        'foundingDate'  => '1998',
+        'email'         => 'info@mandateengineering.co.zw',
+        'telephone'     => '+263242123456',
+        'description'   => mandate_engineering_get_meta_description(),
+        'address'       => array(
+            '@type'           => 'PostalAddress',
+            'streetAddress'   => '179 Erith Road',
+            'addressLocality' => 'Harare',
+            'addressCountry'  => 'ZW',
+        ),
+        'areaServed'    => array(
+            array( '@type' => 'Country', 'name' => 'Zimbabwe' ),
+            array( '@type' => 'Country', 'name' => 'Zambia' ),
+            array( '@type' => 'Country', 'name' => 'South Africa' ),
+        ),
+    );
+    echo '<script type="application/ld+json">' . wp_json_encode( $schema ) . '</script>' . "\n";
+}
+add_action( 'wp_head', 'mandate_engineering_schema_org', 6 );
+
+/**
+ * Provides a robots.txt via the WordPress virtual endpoint and
+ * points crawlers at the built-in XML sitemap.
+ */
+function mandate_engineering_robots_txt( $output, $public ) {
+    if ( ! $public ) {
+        return $output;
+    }
+
+    $lines = array(
+        'User-agent: *',
+        'Disallow: /wp-admin/',
+        'Disallow: /wp-includes/',
+        'Disallow: /?s=',
+        'Disallow: /xmlrpc.php',
+        '',
+        'Sitemap: ' . home_url( '/wp-sitemap.xml' ),
+        '',
+    );
+
+    return implode( "\n", $lines );
+}
+add_filter( 'robots_txt', 'mandate_engineering_robots_txt', 10, 2 );
+
+/**
+ * WordPress security hardening.
+ */
+
+// Disable XML-RPC entirely (blocks brute-force amplification vectors).
+add_filter( 'xmlrpc_enabled', '__return_false' );
+add_filter( 'wp_headers', function ( $headers ) {
+    unset( $headers['X-Pingback'] );
+    return $headers;
+} );
+
+// Hide which field was wrong on the login form (no user enumeration via errors).
+add_filter( 'login_errors', function () {
+    return __( 'Invalid username or password.', 'mandate-engineering' );
+} );
+
+// Block the classic ?author=ID user-enumeration trick.
+add_action( 'template_redirect', function () {
+    if ( isset( $_GET['author'] ) && preg_match( '/^\d+$/', $_GET['author'] ) ) {
+        wp_safe_redirect( home_url( '/' ), 301 );
+        exit;
+    }
+} );
+
+// Block unauthenticated access to the REST users endpoint (/wp-json/wp/v2/users).
+add_filter( 'rest_authentication_errors', function ( $result ) {
+    if ( ! is_user_logged_in() && false !== strpos( $_SERVER['REQUEST_URI'], '/wp/v2/users' ) ) {
+        return new WP_Error( 'rest_forbidden', __( 'Sorry, you are not allowed to do that.', 'mandate-engineering' ), array( 'status' => 403 ) );
+    }
+    return $result;
+} );
+
+// Prevent search engines from indexing the login/admin screens.
+add_action( 'login_head', function () {
+    echo '<meta name="robots" content="noindex, nofollow">' . "\n";
+} );
+add_action( 'admin_head', function () {
+    echo '<meta name="robots" content="noindex, nofollow">' . "\n";
+} );
 
 /**
  * Injects Tailwind v3 Play CDN script and config into <head>.

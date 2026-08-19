@@ -1,0 +1,221 @@
+---
+# ============================================================================
+# Mandate Engineering — Azure + Docker Compose deployment
+#
+# Usage:
+#   ansible-galaxy collection install azure.azcollection community.docker
+#   python3 -m pip install -r ~/.ansible/collections/ansible_collections/azure/azcollection/requirements-azure.txt
+#   ansible-playbook -i localhost, provision-azure.yml --connection=local  # Play 1 only
+#
+# Note: Play 1 runs locally against your Azure subscription (needs azure cli
+# login / service principal). Play 2 runs on the freshly provisioned VM.
+# ============================================================================
+
+# PLAY 1: Provision Azure Infrastructure (Runs locally)
+- name: Provision Azure VM and NSG
+  hosts: localhost
+  connection: local
+  vars:
+    az_resource_group: mandate-engineering-rg
+    az_location: eastus
+    az_vm_name: mandate-engineering-vm
+    az_vm_size: Standard_B2s
+    az_admin_user: azureuser
+    app_port: 8080
+  tasks:
+    - name: Create Azure Resource Group
+      azure.azcollection.azure_rm_resourcegroup:
+        name: "{{ az_resource_group }}"
+        location: "{{ az_location }}"
+
+    - name: Create Virtual Network (VNet)
+      azure.azcollection.azure_rm_virtualnetwork:
+        resource_group: "{{ az_resource_group }}"
+        name: myVNet
+        address_prefixes: "10.0.0.0/16"
+
+    - name: Create Azure Network Security Group (NSG)
+      azure.azcollection.azure_rm_securitygroup:
+        resource_group: "{{ az_resource_group }}"
+        name: myNSG
+        purge_rules: yes
+        rules:
+          - name: Allow-SSH
+            protocol: Tcp
+            destination_port_range: 22
+            access: Allow
+            priority: 1001
+            direction: Inbound
+          - name: Allow-Docker-App
+            protocol: Tcp
+            destination_port_range: "{{ app_port }}"
+            access: Allow
+            priority: 1002
+            direction: Inbound
+
+    - name: Create Subnet and attach NSG
+      azure.azcollection.azure_rm_subnet:
+        resource_group: "{{ az_resource_group }}"
+        vnet_name: myVNet
+        name: mySubnet
+        address_prefix: "10.0.1.0/24"
+        security_group: myNSG
+
+    - name: Create Public IP Address
+      azure.azcollection.azure_rm_publicipaddress:
+        resource_group: "{{ az_resource_group }}"
+        name: myPublicIP
+        allocation_method: Static
+      register: output_public_ip
+
+    - name: Create Network Interface (NIC)
+      azure.azcollection.azure_rm_networkinterface:
+        resource_group: "{{ az_resource_group }}"
+        name: myNIC
+        virtual_network: myVNet
+        subnet: mySubnet
+        public_ip_name: myPublicIP
+
+    - name: Create Virtual Machine
+      azure.azcollection.azure_rm_virtualmachine:
+        resource_group: "{{ az_resource_group }}"
+        name: "{{ az_vm_name }}"
+        vm_size: "{{ az_vm_size }}"
+        admin_username: "{{ az_admin_user }}"
+        ssh_password_enabled: false
+        ssh_public_keys:
+          - path: "/home/{{ az_admin_user }}/.ssh/authorized_keys"
+            key_data: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}" # Path to your local public SSH key
+        image:
+          offer: 0001-com-ubuntu-server-jammy
+          publisher: Canonical
+          sku: 22_04-lts-gen2
+          version: latest
+        network_interfaces: myNIC
+
+    - name: Add newly created VM to transient Ansible inventory
+      add_host:
+        name: "{{ output_public_ip.state.ip_address }}"
+        groups: dynamic_remote_servers
+        ansible_user: "{{ az_admin_user }}"
+        ansible_ssh_private_key_file: ~/.ssh/id_rsa # Path to your local private SSH key
+        site_url: "http://{{ output_public_ip.state.ip_address }}:{{ app_port }}"
+
+
+# PLAY 2: Connect to New VM, Build, and Deploy from Git
+- name: Deploy Mandate Engineering WordPress stack
+  hosts: dynamic_remote_servers
+  become: yes
+  gather_facts: no
+  vars:
+    repo_url: https://github.com/simon93225/mandate-engineering.git
+    app_dir: /opt/mandate-engineering
+    app_port: 8080
+    db_container: mandate-db
+    db_user: wordpress
+    db_pass: wordpress_password
+    db_name: wordpress
+  tasks:
+    - name: Wait for SSH to become available
+      wait_for_connection:
+        delay: 10
+        timeout: 300
+
+    - name: Gather facts once connected
+      setup:
+
+    - name: Install Git and Docker prerequisites
+      apt:
+        name:
+          - git
+          - ca-certificates
+          - curl
+          - gnupg
+        state: present
+        update_cache: yes
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        keyring: /etc/apt/keyrings/docker.gpg
+        state: present
+
+    - name: Add Docker apt repository (jammy)
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        update_cache: yes
+
+    - name: Install Docker Engine + Compose v2 plugin
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Stop and disable default apache2 (frees port 80)
+      systemd:
+        name: apache2
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Clone deployment repository
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ app_dir }}"
+        version: main
+        force: yes
+
+    - name: Write .env with the site URL (used by WORDPRESS_CONFIG_EXTRA)
+      copy:
+        dest: "{{ app_dir }}/.env"
+        content: |
+          SERVER_IP={{ site_url | regex_replace('^http://', '') }}
+
+    - name: Expose WordPress on the app port
+      replace:
+        path: "{{ app_dir }}/docker-compose.server.yml"
+        regexp: '      - "80:80"'
+        replace: '      - "{{ app_port }}:80"'
+
+    - name: Bring up the MariaDB + WordPress stack (first start imports wordpress.sql)
+      command:
+        cmd: docker compose -f docker-compose.server.yml up -d
+        chdir: "{{ app_dir }}"
+
+    - name: Wait for MariaDB to accept connections (DB import running)
+      command: docker exec {{ db_container }} mariadb -u{{ db_user }} -p{{ db_pass }} -e "SELECT 1" {{ db_name }}
+      register: db_check
+      until: db_check.rc == 0
+      retries: 30
+      delay: 3
+      changed_when: false
+      failed_when: db_check.rc != 0
+
+    - name: Point siteurl/home at the new server address
+      command: docker exec {{ db_container }} mariadb -u{{ db_user }} -p{{ db_pass }} {{ db_name }} -e "UPDATE wp_options SET option_value='{{ site_url }}' WHERE option_name IN ('siteurl','home');"
+      changed_when: false
+
+    - name: Wait for WordPress to answer on the app port
+      uri:
+        url: "{{ site_url }}"
+        status_code: 200
+      register: site_check
+      until: site_check.status == 200
+      retries: 30
+      delay: 3
+
+    - name: Report deployment URL
+      debug:
+        msg: "Deployment complete. Site: {{ site_url }} | Admin: {{ site_url }}/wp-admin"

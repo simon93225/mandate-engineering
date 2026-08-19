@@ -1,0 +1,144 @@
+---
+# ============================================================================
+# Mandate Engineering — Mailu mail server deployment (any non-Azure VPS)
+#
+# Usage:
+#   ansible-playbook -i <host>, -u root -e 'mailu_domain=yourdomain.com' \
+#     ansible/provision-mailu.yml
+#
+# Required DNS records (set at your registrar BEFORE running, TLS needs them):
+#   A       mail.yourdomain.com        -> <VPS public IP>
+#   MX      @                          -> mail.yourdomain.com (priority 10)
+#   SPF     @                          -> v=spf1 mx a ip4:<VPS IP> ~all
+#   DKIM    mail._domainkey            -> generated in the admin UI after deploy
+#   DMARC   _dmarc                     -> v=DMARC1; p=quarantine; rua=mailto:postmaster@yourdomain.com
+#   PTR     <reverse DNS in provider panel> -> mail.yourdomain.com
+#
+# Ensure the VPS firewall allows: 25, 465, 587, 110, 143, 993, 995, 80, 443.
+# ============================================================================
+
+- name: Deploy Mailu mail server stack
+  hosts: all
+  become: yes
+  gather_facts: no
+  vars:
+    mail_dir: /opt/mailu
+    mailu_domain: "{{ mailu_domain | default('example.com') }}"
+    mailu_hostname: "{{ mailu_hostname | default('mail.' + mailu_domain) }}"
+    mailu_sitename: "{{ mailu_sitename | default('Mandate Engineering Mail') }}"
+    mailu_tz: "{{ mailu_tz | default('Africa/Harare') }}"
+    mailu_antivirus: "{{ mailu_antivirus | default('clamav') }}"
+    mailu_fetchmail: "{{ mailu_fetchmail | default('0') }}"
+    mailu_webdav: "{{ mailu_webdav | default('0') }}"
+    mailu_db_user: "{{ mailu_db_user | default('mailu') }}"
+    mailu_db_name: "{{ mailu_db_name | default('mailu') }}"
+    mailu_subnet: "{{ mailu_subnet | default('172.18.0') }}"
+  tasks:
+    - name: Wait for SSH to become available
+      wait_for_connection:
+        delay: 10
+        timeout: 300
+
+    - name: Gather facts once connected
+      setup:
+
+    - name: Install Git and Docker prerequisites
+      apt:
+        name:
+          - git
+          - ca-certificates
+          - curl
+          - gnupg
+        state: present
+        update_cache: yes
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        keyring: /etc/apt/keyrings/docker.gpg
+        state: present
+
+    - name: Add Docker apt repository
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        update_cache: yes
+
+    - name: Install Docker Engine + Compose v2 plugin
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Stop and disable default apache2 (frees ports)
+      systemd:
+        name: apache2
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Generate persistent secrets (stored in credentials/ next to playbook)
+      set_fact:
+        mailu_secret_key: "{{ lookup('password', 'credentials/mailu_secret chars=ascii_letters,digits,hexdigits length=48') }}"
+        mailu_db_pass: "{{ lookup('password', 'credentials/mailu_db_pass chars=ascii_letters,digits,hexdigits length=32') }}"
+
+    - name: Create Mailu directory tree
+      file:
+        path: "{{ mail_dir }}/{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - ""
+        - data
+        - certs
+        - dkim
+        - overrides/nginx
+        - overrides/dovecot
+        - overrides/postfix
+
+    - name: Render mailu.env from template
+      template:
+        src: mailu/mailu.env.j2
+        dest: "{{ mail_dir }}/mailu.env"
+        mode: "0600"
+
+    - name: Copy docker-compose.yml
+      copy:
+        src: mailu/docker-compose.yml
+        dest: "{{ mail_dir }}/docker-compose.yml"
+        mode: "0644"
+
+    - name: Bring up the Mailu stack
+      command:
+        cmd: docker compose --env-file mailu.env up -d
+        chdir: "{{ mail_dir }}"
+
+    - name: Wait for the admin interface (HTTPS, port 443)
+      uri:
+        url: "https://{{ mailu_hostname }}"
+        status_code: 200
+        validate_certs: no
+      register: admin_check
+      until: admin_check.status == 200
+      retries: 30
+      delay: 5
+
+    - name: Report deployment details
+      debug:
+        msg:
+          - "Mailu deployed to {{ mail_dir }}"
+          - "Webmail/admin: https://{{ mailu_hostname }}"
+          - "Initial admin login: admin@{{ mailu_domain }} (password set on first visit)"
+          - "NEXT: create your real mailbox + generate DKIM key in the admin UI."
+          - "NEXT: run a test at https://www.mail-tester.com to confirm deliverability."

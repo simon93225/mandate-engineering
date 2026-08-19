@@ -1,0 +1,147 @@
+version: "3.8"
+
+# ============================================================================
+# Mailu — full-featured mail server stack (Docker Compose)
+# Config values come from mailu.env (rendered from mailu.env.j2 by Ansible).
+# ============================================================================
+
+services:
+  # ------------------------------------------------------------------
+  # External services
+  # ------------------------------------------------------------------
+  redis:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - "./data/redis:/data"
+
+  postgresql:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+    volumes:
+      - "./data/db:/var/lib/postgresql/data"
+
+  resolver:
+    image: mailu/unbound:1.19
+    restart: always
+    environment:
+      - TZ=${TZ}
+    networks:
+      default:
+        ipv4_address: ${SUBNET}.13
+
+  # ------------------------------------------------------------------
+  # Core services
+  # ------------------------------------------------------------------
+  front:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-nginx}:${MAILU_VERSION:-1.19}
+    restart: always
+    depends_on:
+      - resolver
+    ports:
+      - "${BIND_ADDRESS4:-0.0.0.0}:25:25"
+      - "${BIND_ADDRESS4:-0.0.0.0}:465:465"
+      - "${BIND_ADDRESS4:-0.0.0.0}:587:587"
+      - "${BIND_ADDRESS4:-0.0.0.0}:110:110"
+      - "${BIND_ADDRESS4:-0.0.0.0}:143:143"
+      - "${BIND_ADDRESS4:-0.0.0.0}:993:993"
+      - "${BIND_ADDRESS4:-0.0.0.0}:995:995"
+      - "${BIND_ADDRESS4:-0.0.0.0}:80:80"
+      - "${BIND_ADDRESS4:-0.0.0.0}:443:443"
+    volumes:
+      - "./certs:/certs"
+      - "./overrides/nginx:/overrides:ro"
+    environment:
+      - HOSTNAMES=${HOSTNAMES}
+      - POSTMASTER=${POSTMASTER}
+      - TLS=${TLS}
+      - TLS_FLAVOR=${TLS_FLAVOR}
+    networks:
+      default:
+        ipv4_address: ${SUBNET}.10
+
+  admin:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-admin}:${MAILU_VERSION:-1.19}
+    restart: always
+    depends_on:
+      - redis
+    volumes:
+      - "./data:/data"
+      - "./dkim:/dkim"
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - FQDN=${HOSTNAMES}
+      - DOMAIN=${DOMAIN}
+      - ADMIN=${ADMIN}
+      - SITENAME=${SITENAME}
+    networks:
+      default:
+        ipv4_address: ${SUBNET}.20
+
+  imap:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-dovecot}:${MAILU_VERSION:-1.19}
+    restart: always
+    volumes:
+      - "./data/dovecot:/data"
+      - "./overrides/dovecot:/overrides:ro"
+    environment:
+      - TZ=${TZ}
+      - HOSTNAMES=${HOSTNAMES}
+    networks:
+      default:
+        ipv4_address: ${SUBNET}.21
+
+  smtp:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-postfix}:${MAILU_VERSION:-1.19}
+    restart: always
+    volumes:
+      - "./data/postfix:/data"
+      - "./overrides/postfix:/overrides:ro"
+    environment:
+      - HOSTNAMES=${HOSTNAMES}
+      - POSTMASTER=${POSTMASTER}
+      - TZ=${TZ}
+    networks:
+      default:
+        ipv4_address: ${SUBNET}.22
+
+  fetchmail:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-fetchmail}:${MAILU_VERSION:-1.19}
+    restart: always
+    volumes:
+      - "./data/fetchmail:/data"
+    environment:
+      - TZ=${TZ}
+    networks:
+      default:
+        ipv4_address: ${SUBNET}.23
+
+  antivirus:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-clamav}:${MAILU_VERSION:-1.19}
+    restart: always
+    volumes:
+      - "./data/clamav:/data"
+    networks:
+      default:
+        ipv4_address: ${SUBNET}.30
+
+  webdav:
+    image: ${DOCKER_ORG:-mailu}/${DOCKER_PREFIX:-radicale}:${MAILU_VERSION:-1.19}
+    restart: always
+    volumes:
+      - "./data/radicale:/data"
+    networks:
+      default:
+        ipv4_address: ${SUBNET}.24
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${SUBNET}.0/24

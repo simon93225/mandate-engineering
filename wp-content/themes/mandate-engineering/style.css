@@ -1636,13 +1636,14 @@ button:hover,
   inset: 0;
   z-index: 1200;
   display: none;
-  background: rgba(5, 12, 25, 0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(5, 12, 25, 0.97);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .image-viewer.is-open {
   display: flex;
+  opacity: 1;
 }
 
 .image-viewer-backdrop {

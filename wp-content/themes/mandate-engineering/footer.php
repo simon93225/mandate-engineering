@@ -48,9 +48,9 @@
             <div class="footer-divider border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
                 <p>&copy; <?php echo date('Y'); ?> Mandate Engineering. All rights reserved.</p>
                 <nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-400" aria-label="Legal">
-                    <a href="<?php echo esc_url( get_template_directory_uri() . '/assets/documents/Privacy-Policy.pdf' ); ?>" target="_blank" rel="noopener" class="hover:text-brand-emerald transition-colors">Privacy Policy</a>
-                    <a href="<?php echo esc_url( get_template_directory_uri() . '/assets/documents/Terms-and-Conditions.pdf' ); ?>" target="_blank" rel="noopener" class="hover:text-brand-emerald transition-colors">Terms &amp; Conditions</a>
-                    <a href="<?php echo esc_url( get_template_directory_uri() . '/assets/documents/Disclaimer.pdf' ); ?>" target="_blank" rel="noopener" class="hover:text-brand-emerald transition-colors">Disclaimer</a>
+                    <a href="<?php echo esc_url( get_template_directory_uri() . '/assets/documents/Privacy-Policy.pdf' ); ?>" class="legal-doc-link hover:text-brand-emerald transition-colors" data-doc-title="Privacy Policy">Privacy Policy</a>
+                    <a href="<?php echo esc_url( get_template_directory_uri() . '/assets/documents/Terms-and-Conditions.pdf' ); ?>" class="legal-doc-link hover:text-brand-emerald transition-colors" data-doc-title="Terms and Conditions">Terms &amp; Conditions</a>
+                    <a href="<?php echo esc_url( get_template_directory_uri() . '/assets/documents/Disclaimer.pdf' ); ?>" class="legal-doc-link hover:text-brand-emerald transition-colors" data-doc-title="Disclaimer">Disclaimer</a>
                 </nav>
             </div>
         </div>
@@ -107,6 +107,23 @@
             <img class="image-viewer-img" src="" alt="">
             <figcaption class="image-viewer-caption"></figcaption>
         </figure>
+    </div>
+</div>
+
+<!-- Document Viewer (legal PDFs shown in-page with Exit, no new tab) -->
+<div id="doc-viewer" class="doc-viewer" role="dialog" aria-modal="true" aria-label="Document viewer" aria-hidden="true">
+    <div class="doc-viewer-backdrop" data-doc-viewer-close></div>
+    <div class="doc-viewer-panel">
+        <div class="doc-viewer-toolbar">
+            <span class="doc-viewer-title" id="doc-viewer-title"></span>
+            <button type="button" class="doc-viewer-exit" data-doc-viewer-close aria-label="Exit document view">
+                <span class="doc-viewer-exit-icon" aria-hidden="true">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </span>
+                <span>Exit</span>
+            </button>
+        </div>
+        <iframe class="doc-viewer-frame" src="" title="Document preview" loading="lazy"></iframe>
     </div>
 </div>
 
@@ -314,6 +331,47 @@
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && viewer.classList.contains('is-open')) {
                 closeViewer();
+            }
+        });
+    }
+
+    // Document viewer: open legal PDFs in an in-page overlay with an Exit
+    // button instead of a new browser tab (keeps the site favicon/theme).
+    var docViewer = document.getElementById('doc-viewer');
+    if (docViewer) {
+        var docFrame = docViewer.querySelector('.doc-viewer-frame');
+        var docTitle = docViewer.querySelector('.doc-viewer-title');
+
+        function openDoc(src, title) {
+            docTitle.textContent = title || 'Document';
+            docFrame.setAttribute('src', src);
+            docViewer.classList.add('is-open');
+            docViewer.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDoc() {
+            docViewer.classList.remove('is-open');
+            docViewer.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            docFrame.removeAttribute('src');
+        }
+
+        document.querySelectorAll('.legal-doc-link').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
+                openDoc(link.getAttribute('href'), link.getAttribute('data-doc-title'));
+            });
+        });
+
+        docViewer.querySelectorAll('[data-doc-viewer-close]').forEach(function (el) {
+            el.addEventListener('click', closeDoc);
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && docViewer.classList.contains('is-open')) {
+                closeDoc();
             }
         });
     }

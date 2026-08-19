@@ -91,6 +91,25 @@
     </button>
 </div>
 
+<!-- Image Viewer Lightbox -->
+<div id="image-viewer" class="image-viewer" role="dialog" aria-modal="true" aria-label="Image viewer" aria-hidden="true">
+    <div class="image-viewer-backdrop" data-image-viewer-close></div>
+    <div class="image-viewer-panel">
+        <div class="image-viewer-toolbar">
+            <button type="button" class="image-viewer-exit" data-image-viewer-close aria-label="Exit image view">
+                <span class="image-viewer-exit-icon" aria-hidden="true">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </span>
+                <span>Exit</span>
+            </button>
+        </div>
+        <figure class="image-viewer-figure">
+            <img class="image-viewer-img" src="" alt="">
+            <figcaption class="image-viewer-caption"></figcaption>
+        </figure>
+    </div>
+</div>
+
 <script>
 (function () {
     var LIMIT = 6;
@@ -253,6 +272,50 @@
             }
         });
         if (close) { close.addEventListener('click', closePopup); }
+    }
+
+    // Image viewer: open gallery images in an overlay instead of the
+    // raw-image view, with an explicit "Exit" button on desktop and mobile.
+    var viewer = document.getElementById('image-viewer');
+    if (viewer) {
+        var viewerImg = viewer.querySelector('.image-viewer-img');
+        var viewerCaption = viewer.querySelector('.image-viewer-caption');
+
+        function openViewer(src, alt, caption) {
+            viewerImg.src = src;
+            viewerImg.alt = alt || '';
+            viewerCaption.textContent = caption || '';
+            viewer.classList.add('is-open');
+            viewer.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeViewer() {
+            viewer.classList.remove('is-open');
+            viewer.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            viewerImg.removeAttribute('src');
+        }
+
+        document.querySelectorAll('.gallery-card').forEach(function (card) {
+            card.addEventListener('click', function (e) {
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
+                var img = card.querySelector('img');
+                var alt = img ? (img.getAttribute('alt') || '') : '';
+                openViewer(card.getAttribute('href'), alt, card.getAttribute('aria-label') || alt);
+            });
+        });
+
+        viewer.querySelectorAll('[data-image-viewer-close]').forEach(function (el) {
+            el.addEventListener('click', closeViewer);
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && viewer.classList.contains('is-open')) {
+                closeViewer();
+            }
+        });
     }
 }());
 </script>

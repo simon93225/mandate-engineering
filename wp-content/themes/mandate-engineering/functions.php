@@ -646,7 +646,7 @@ function mandate_engineering_scripts() {
     );
 
     // Theme stylesheet
-    wp_enqueue_style( 'mandate-style', get_stylesheet_uri(), array( 'mandate-google-fonts' ), '2.0.0' );
+    wp_enqueue_style( 'mandate-style', get_stylesheet_uri(), array( 'mandate-google-fonts' ), '2.0.1' );
 }
 add_action( 'wp_enqueue_scripts', 'mandate_engineering_scripts' );
 

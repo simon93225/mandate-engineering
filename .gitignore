@@ -2,3 +2,5 @@
 .vite/
 node_modules/
 *.log
+*.bak
+wp-config.php

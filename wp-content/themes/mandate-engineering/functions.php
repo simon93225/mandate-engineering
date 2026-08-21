@@ -612,6 +612,35 @@ function mandate_engineering_get_condensers_gallery() {
 }
 
 /**
+ * Returns the general workshop gallery by scanning the workshop image
+ * directory. Each entry: array( 'url', 'full', 'alt' ). New images dropped
+ * into the folder appear automatically.
+ */
+function mandate_engineering_get_workshop_gallery() {
+    $dir  = get_template_directory() . '/assets/images/gallery/workshop';
+    $base = get_template_directory_uri() . '/assets/images/gallery/workshop/';
+    $files = glob( $dir . '/*.jpg' );
+
+    if ( empty( $files ) ) {
+        return array();
+    }
+
+    sort( $files );
+
+    $gallery = array();
+    foreach ( $files as $path ) {
+        $file = basename( $path );
+        $gallery[] = array(
+            'url'  => $base . $file,
+            'full' => $base . $file,
+            'alt'  => 'Workshop project by Mandate Engineering',
+        );
+    }
+
+    return $gallery;
+}
+
+/**
  * Returns the three featured workshop images picked from across all
  * service galleries (one per product line). Each entry: array( 'url', 'full', 'alt' ).
  */

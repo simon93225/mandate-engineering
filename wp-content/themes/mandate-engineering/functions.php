@@ -723,7 +723,7 @@ function mandate_engineering_schema_org() {
         'logo'          => get_stylesheet_directory_uri() . '/assets/favicon.svg',
         'foundingDate'  => '1998',
         'email'         => 'info@mandateengineering.co.zw',
-        'telephone'     => '+263242123456',
+        'telephone'     => '+263772967719',
         'description'   => mandate_engineering_get_meta_description(),
         'address'       => array(
             '@type'           => 'PostalAddress',

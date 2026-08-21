@@ -95,7 +95,7 @@ $captcha_nonce  = wp_create_nonce( 'mandate_captcha_' . $captcha_answer );
                 </div>
                 <h2 class="text-2xl font-heading font-bold mb-5">Harare, Zimbabwe</h2>
                 <p class="text-slate-300 mb-5">179 Erith Road, Harare</p>
-                <a href="tel:+263242123456" class="block text-slate-300 hover:text-brand-emerald mb-3 transition-colors">+263 (0) 242 123 456</a>
+                <a href="tel:+263772967719" class="block text-slate-300 hover:text-brand-emerald mb-3 transition-colors">+263 772 967 719</a>
                 <a href="mailto:info@mandateengineering.co.zw" class="block text-slate-300 hover:text-brand-emerald transition-colors">info@mandateengineering.co.zw</a>
                 <a href="https://www.google.com/maps/search/?api=1&amp;query=179%20Erith%20Road%2C%20Harare%2C%20Zimbabwe" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-7 text-brand-emerald font-heading font-bold hover:underline text-sm">
                     Open in Google Maps

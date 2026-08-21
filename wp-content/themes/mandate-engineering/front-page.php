@@ -31,7 +31,7 @@ get_header();
                 KEEP INDUSTRY <br/><span class="text-brand-emerald" style="text-shadow: 0 0 40px rgba(0, 230, 118, 0.25);">MOVING.</span>
             </h1>
             <p class="hero-copy text-lg md:text-xl lg:text-2xl text-slate-300 mb-12 max-w-3xl leading-relaxed font-light">
-                We manufacture, service, and repair cooling and heat-transfer equipment, boilers, steam lines, radiators, and custom metalwork — precision engineering that keeps Zimbabwe's industry running, since 1998.
+                We specialise in fabrication, sheet metalwork, and the manufacture, service, and repair of cooling and heat-transfer equipment, boilers, steam lines, and radiators — precision engineering that keeps Zimbabwe's industry running, since 1998.
             </p>
             <div class="hero-actions flex flex-col sm:flex-row gap-4 sm:gap-5">
                 <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>" class="button-primary px-8 py-4 rounded-lg font-heading font-bold text-lg bg-brand-emerald text-brand-navy-deep hover:bg-[#169653] transition-all duration-300 text-center">Request a Quote</a>

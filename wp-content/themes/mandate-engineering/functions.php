@@ -753,10 +753,16 @@ function mandate_engineering_schema_org() {
         'foundingDate'  => '1998',
         'email'         => 'info@mandateengineering.co.zw',
         'telephone'     => '+263772967719',
+        'contactPoint'  => array(
+            '@type'             => 'ContactPoint',
+            'telephone'         => '+263777749887',
+            'contactType'       => 'customer service',
+            'areaServed'        => 'Bulawayo, Zimbabwe',
+        ),
         'description'   => mandate_engineering_get_meta_description(),
         'address'       => array(
             '@type'           => 'PostalAddress',
-            'streetAddress'   => '179 Erith Road',
+            'streetAddress'   => '179 Erith Road, Willowvale',
             'addressLocality' => 'Harare',
             'addressCountry'  => 'ZW',
         ),
@@ -764,6 +770,22 @@ function mandate_engineering_schema_org() {
             array( '@type' => 'Country', 'name' => 'Zimbabwe' ),
             array( '@type' => 'Country', 'name' => 'Zambia' ),
             array( '@type' => 'Country', 'name' => 'South Africa' ),
+        ),
+        'department'    => array(
+            '@type'         => 'Organization',
+            'name'          => 'Mandate Engineering Bulawayo Office',
+            'telephone'     => '02429260716',
+            'contactPoint'  => array(
+                '@type'      => 'ContactPoint',
+                'telephone'  => '+263777749887',
+                'contactType' => 'customer service',
+            ),
+            'address'       => array(
+                '@type'           => 'PostalAddress',
+                'streetAddress'   => '17 Avery Road, Thornegroove',
+                'addressLocality' => 'Bulawayo',
+                'addressCountry'  => 'ZW',
+            ),
         ),
     );
     echo '<script type="application/ld+json">' . wp_json_encode( $schema ) . '</script>' . "\n";
@@ -865,4 +887,3 @@ function mandate_engineering_tailwind_cdn() {
     <?php
 }
 add_action( 'wp_head', 'mandate_engineering_tailwind_cdn', 1 );
-

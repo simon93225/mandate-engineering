@@ -23,11 +23,13 @@
                 <div>
                     <h4 class="font-bold mb-6 uppercase tracking-wider text-xs">Zimbabwe</h4>
                     <p class="text-white font-semibold mb-2 text-sm">Head Office — Harare</p>
-                    <p class="text-slate-400 mb-2 text-sm">179 Erith Road, Harare</p>
+                    <p class="text-slate-400 mb-2 text-sm">179 Erith Road, Willowvale, Harare</p>
                     <p class="text-slate-400 mb-2 text-sm">Phone: +263 772 967 719</p>
                     <p class="text-slate-400 mb-5 text-sm">Email: info@mandateengineering.co.zw</p>
                     <p class="text-white font-semibold mb-2 text-sm">Bulawayo</p>
-                    <p class="text-slate-400 text-sm">Contact details available on request.</p>
+                    <p class="text-slate-400 mb-2 text-sm">17 Avery Road, Thornegroove, Bulawayo</p>
+                    <p class="text-slate-400 mb-2 text-sm">Tel: 02429260716</p>
+                    <p class="text-slate-400 text-sm">Cell: 263777749887</p>
                 </div>
                 <div>
                     <h4 class="font-bold mb-6 uppercase tracking-wider text-xs">South Africa</h4>

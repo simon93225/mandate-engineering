@@ -87,17 +87,31 @@ $captcha_nonce  = wp_create_nonce( 'mandate_captcha_' . $captcha_answer );
             </form>
         </div>
 
-        <!-- Head Office Info Card -->
-        <aside class="mt-8 animate-on-scroll">
+        <!-- Office Locations -->
+        <aside class="mt-8 grid gap-8 md:grid-cols-2 animate-on-scroll">
             <div class="contact-info-card text-white p-8 md:p-10 text-center">
                 <div class="section-marker justify-center mb-4">
                     <span>HEAD OFFICE</span>
                 </div>
                 <h2 class="text-2xl font-heading font-bold mb-5">Harare, Zimbabwe</h2>
-                <p class="text-slate-300 mb-5">179 Erith Road, Harare</p>
+                <p class="text-slate-300 mb-5">179 Erith Road, Willowvale, Harare</p>
                 <a href="tel:+263772967719" class="block text-slate-300 hover:text-brand-emerald mb-3 transition-colors">+263 772 967 719</a>
                 <a href="mailto:info@mandateengineering.co.zw" class="block text-slate-300 hover:text-brand-emerald transition-colors">info@mandateengineering.co.zw</a>
-                <a href="https://www.google.com/maps/search/?api=1&amp;query=179%20Erith%20Road%2C%20Harare%2C%20Zimbabwe" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-7 text-brand-emerald font-heading font-bold hover:underline text-sm">
+                <a href="https://www.google.com/maps/search/?api=1&amp;query=179%20Erith%20Road%2C%20Willowvale%2C%20Harare%2C%20Zimbabwe" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-7 text-brand-emerald font-heading font-bold hover:underline text-sm">
+                    Open in Google Maps
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </a>
+            </div>
+            <div class="contact-info-card text-white p-8 md:p-10 text-center">
+                <div class="section-marker justify-center mb-4">
+                    <span>BULAWAYO OFFICE</span>
+                </div>
+                <h2 class="text-2xl font-heading font-bold mb-5">Bulawayo, Zimbabwe</h2>
+                <p class="text-slate-300 mb-5">17 Avery Road, Thornegroove, Bulawayo</p>
+                <a href="tel:02429260716" class="block text-slate-300 hover:text-brand-emerald mb-3 transition-colors">Tel: 02429260716</a>
+                <a href="tel:+263777749887" class="block text-slate-300 hover:text-brand-emerald mb-3 transition-colors">Cell: 263777749887</a>
+                <a href="mailto:info@mandateengineering.co.zw" class="block text-slate-300 hover:text-brand-emerald transition-colors">info@mandateengineering.co.zw</a>
+                <a href="https://www.google.com/maps/search/?api=1&amp;query=17%20Avery%20Road%2C%20Thornegroove%2C%20Bulawayo%2C%20Zimbabwe" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-7 text-brand-emerald font-heading font-bold hover:underline text-sm">
                     Open in Google Maps
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </a>

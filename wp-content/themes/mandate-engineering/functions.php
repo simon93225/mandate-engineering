@@ -262,7 +262,7 @@ function mandate_engineering_flush_rewrites_once() {
 add_action( 'admin_init', 'mandate_engineering_flush_rewrites_once', 30 );
 
 /**
- * Processes public contact enquiries and sends them to the WordPress site administrator.
+ * Processes public contact enquiries and sends them to the Mandate Engineering inbox.
  */
 function mandate_engineering_handle_contact_form() {
     $contact_url = home_url( '/contact/' );
@@ -306,13 +306,78 @@ function mandate_engineering_handle_contact_form() {
 
     $subject = sprintf( '[Mandate Engineering] New enquiry from %s', $name );
     $body    = "Name: {$name}\nEmail: {$email}\nPhone: {$phone}\nService: {$service}\n\nMessage:\n{$message}";
-    $sent    = wp_mail( get_option( 'admin_email' ), $subject, $body, array( "Reply-To: {$name} <{$email}>" ) );
+    $sent    = wp_mail( 'info@mandateengineering.com', $subject, $body, array( "Reply-To: {$name} <{$email}>" ) );
 
     wp_safe_redirect( add_query_arg( 'contact', $sent ? 'sent' : 'error', $contact_url ) );
     exit;
 }
 add_action( 'admin_post_nopriv_mandate_contact_form', 'mandate_engineering_handle_contact_form' );
 add_action( 'admin_post_mandate_contact_form', 'mandate_engineering_handle_contact_form' );
+
+/**
+ * Adds editable homepage copy to the native WordPress Customizer.
+ */
+function mandate_engineering_customize_register( $wp_customize ) {
+    $wp_customize->add_section( 'mandate_homepage_content', array(
+        'title'    => __( 'Homepage Content', 'mandate-engineering' ),
+        'priority' => 30,
+    ) );
+
+    $fields = array(
+        'mandate_hero_eyebrow' => array(
+            'label'   => __( 'Hero eyebrow', 'mandate-engineering' ),
+            'default' => 'ESTABLISHED 1998 • HARARE • BULAWAYO • ZAMBIA',
+        ),
+        'mandate_hero_title' => array(
+            'label'   => __( 'Hero title', 'mandate-engineering' ),
+            'default' => 'KEEP INDUSTRY',
+        ),
+        'mandate_hero_title_accent' => array(
+            'label'   => __( 'Hero title accent', 'mandate-engineering' ),
+            'default' => 'MOVING.',
+        ),
+        'mandate_hero_copy' => array(
+            'label'   => __( 'Hero description', 'mandate-engineering' ),
+            'default' => "We specialise in fabrication, sheet metalwork, and the manufacture, service, and repair of cooling and heat-transfer equipment, boilers, steam lines, and radiators — precision engineering that keeps Zimbabwe's industry running, since 1998.",
+            'type'    => 'textarea',
+        ),
+        'mandate_about_intro' => array(
+            'label'   => __( 'Why Partner With Us description', 'mandate-engineering' ),
+            'default' => 'Established in 1998, Mandate Engineering is a fully fledged engineering company serving clients from Harare and Bulawayo to Zambia.',
+            'type'    => 'textarea',
+        ),
+        'mandate_services_intro' => array(
+            'label'   => __( 'Products & Services description', 'mandate-engineering' ),
+            'default' => 'Our products and engineering services support air-conditioning, cleaning, construction, transport, home, and industrial processing applications.',
+            'type'    => 'textarea',
+        ),
+        'mandate_workshop_intro' => array(
+            'label'   => __( 'Workshop description', 'mandate-engineering' ),
+            'default' => 'A look inside our workshops and the engineering work we deliver for our clients.',
+            'type'    => 'textarea',
+        ),
+        'mandate_clients_intro' => array(
+            'label'   => __( 'Clients & Testimonials description', 'mandate-engineering' ),
+            'default' => 'Power generation, agriculture, and industrial clients across Zimbabwe rely on Mandate Engineering for dependable cooling, boiler, and heat-transfer solutions.',
+            'type'    => 'textarea',
+        ),
+    );
+
+    foreach ( $fields as $setting => $field ) {
+        $wp_customize->add_setting( $setting, array(
+            'default'           => $field['default'],
+            'sanitize_callback' => 'sanitize_textarea_field',
+            'transport'         => 'refresh',
+        ) );
+
+        $wp_customize->add_control( $setting, array(
+            'label'   => $field['label'],
+            'section' => 'mandate_homepage_content',
+            'type'    => isset( $field['type'] ) ? $field['type'] : 'text',
+        ) );
+    }
+}
+add_action( 'customize_register', 'mandate_engineering_customize_register' );
 
 /**
  * Returns images attached to the page currently being viewed for the project gallery.

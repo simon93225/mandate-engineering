@@ -25,13 +25,13 @@ get_header();
         <div class="hero-content container mx-auto px-6 md:px-10 relative z-10 max-w-6xl">
             <div class="hero-eyebrow inline-flex flex-wrap items-center justify-center gap-3 px-5 py-2.5 mb-8 border border-brand-emerald/30 text-brand-emerald rounded-full uppercase tracking-widest text-xs font-bold bg-brand-emerald/5 backdrop-blur-md">
                 <span class="w-2 h-2 rounded-full bg-brand-emerald animate-pulse"></span>
-                ESTABLISHED 1998 • HARARE • BULAWAYO • ZAMBIA
+                 <?php echo esc_html( get_theme_mod( 'mandate_hero_eyebrow', 'ESTABLISHED 1998 • HARARE • BULAWAYO • ZAMBIA' ) ); ?>
             </div>
             <h1 class="hero-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-extrabold leading-none mb-8 tracking-tight">
-                KEEP INDUSTRY <br/><span class="text-brand-emerald" style="text-shadow: 0 0 40px rgba(0, 230, 118, 0.25);">MOVING.</span>
+                 <?php echo esc_html( get_theme_mod( 'mandate_hero_title', 'KEEP INDUSTRY' ) ); ?> <br/><span class="text-brand-emerald" style="text-shadow: 0 0 40px rgba(0, 230, 118, 0.25);"><?php echo esc_html( get_theme_mod( 'mandate_hero_title_accent', 'MOVING.' ) ); ?></span>
             </h1>
             <p class="hero-copy text-lg md:text-xl lg:text-2xl text-slate-300 mb-12 max-w-3xl leading-relaxed font-light">
-                We specialise in fabrication, sheet metalwork, and the manufacture, service, and repair of cooling and heat-transfer equipment, boilers, steam lines, and radiators — precision engineering that keeps Zimbabwe's industry running, since 1998.
+                 <?php echo esc_html( get_theme_mod( 'mandate_hero_copy', "We specialise in fabrication, sheet metalwork, and the manufacture, service, and repair of cooling and heat-transfer equipment, boilers, steam lines, and radiators — precision engineering that keeps Zimbabwe's industry running, since 1998." ) ); ?>
             </p>
             <div class="hero-actions flex flex-col sm:flex-row gap-4 sm:gap-5">
                 <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>" class="button-primary px-8 py-4 rounded-lg font-heading font-bold text-lg bg-brand-emerald text-brand-navy-deep hover:bg-[#169653] transition-all duration-300 text-center">Request a Quote</a>
@@ -55,7 +55,7 @@ get_header();
                 </div>
                 <h2 class="text-4xl md:text-5xl font-heading font-bold text-white mb-5 tracking-tight animate-on-scroll">Why Partner With Us</h2>
                 <div class="accent-line w-24 h-[3px] mx-auto mb-6 animate-on-scroll"></div>
-                <p class="text-slate-400 text-lg animate-on-scroll">Established in 1998, Mandate Engineering is a fully fledged engineering company serving clients from Harare and Bulawayo to Zambia.</p>
+                 <p class="text-slate-400 text-lg animate-on-scroll"><?php echo esc_html( get_theme_mod( 'mandate_about_intro', 'Established in 1998, Mandate Engineering is a fully fledged engineering company serving clients from Harare and Bulawayo to Zambia.' ) ); ?></p>
             </div>
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="value-card p-8 rounded-xl animate-on-scroll" style="transition-delay: 0.1s;">
@@ -86,7 +86,7 @@ get_header();
                 </div>
                 <h2 class="text-4xl md:text-5xl font-heading font-bold text-white mb-5 tracking-tight animate-on-scroll">Products &amp; Services</h2>
                 <div class="accent-line w-24 h-[3px] mx-auto mb-6 animate-on-scroll"></div>
-                <p class="text-slate-400 text-lg max-w-3xl mx-auto animate-on-scroll">Our products and engineering services support air-conditioning, cleaning, construction, transport, home, and industrial processing applications.</p>
+                 <p class="text-slate-400 text-lg max-w-3xl mx-auto animate-on-scroll"><?php echo esc_html( get_theme_mod( 'mandate_services_intro', 'Our products and engineering services support air-conditioning, cleaning, construction, transport, home, and industrial processing applications.' ) ); ?></p>
             </div>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <a href="<?php echo esc_url( home_url( '/cooling-heat-transfer/' ) ); ?>" class="service-card p-8 animate-on-scroll block" style="transition-delay: 0.1s;">
@@ -150,7 +150,7 @@ get_header();
                 </div>
                 <h2 class="text-4xl md:text-5xl font-heading font-bold text-white mb-5 tracking-tight animate-on-scroll">Inside Our Workshop</h2>
                 <div class="accent-line w-24 h-[3px] mx-auto mb-6 animate-on-scroll"></div>
-                <p class="text-slate-400 text-lg animate-on-scroll">A look inside our workshops and the engineering work we deliver for our clients.</p>
+                 <p class="text-slate-400 text-lg animate-on-scroll"><?php echo esc_html( get_theme_mod( 'mandate_workshop_intro', 'A look inside our workshops and the engineering work we deliver for our clients.' ) ); ?></p>
             </div>
             <div class="text-center mb-12 animate-on-scroll">
                 <a href="<?php echo esc_url( mandate_engineering_get_projects_page_url() ); ?>" class="btn-glow inline-flex items-center gap-3 px-8 py-3.5 rounded-lg font-heading font-bold bg-brand-emerald text-brand-navy-deep hover:bg-[#169653] transition-all duration-300">
@@ -185,7 +185,7 @@ get_header();
                 </div>
                 <h2 class="text-4xl md:text-5xl font-heading font-bold text-white mb-5 tracking-tight animate-on-scroll">Trusted by Industry Leaders</h2>
                 <div class="accent-line w-24 h-[3px] mx-auto mb-6 animate-on-scroll"></div>
-                <p class="text-slate-400 text-lg animate-on-scroll">Power generation, agriculture, and industrial clients across Zimbabwe rely on Mandate Engineering for dependable cooling, boiler, and heat-transfer solutions.</p>
+                 <p class="text-slate-400 text-lg animate-on-scroll"><?php echo esc_html( get_theme_mod( 'mandate_clients_intro', 'Power generation, agriculture, and industrial clients across Zimbabwe rely on Mandate Engineering for dependable cooling, boiler, and heat-transfer solutions.' ) ); ?></p>
             </div>
 
             <div class="clients-slider mb-16 md:mb-20" data-autoplay="3800">
